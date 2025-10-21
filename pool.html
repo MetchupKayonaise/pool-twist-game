@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Pool Twist Game</title>
+  <style>
+    canvas {
+      background: #222;
+      display: block;
+      margin: 0 auto;
+      border: 2px solid #fff;
+    }
+  </style>
+</head>
+<body>
+  <canvas id="gameCanvas" width="800" height="600"></canvas>
+
+  <script>
+    const canvas = document.getElementById("gameCanvas");
+    const ctx = canvas.getContext("2d");
+
+    const ball = {
+      x: 400,
+      y: 300,
+      radius: 15,
+      vx: 0,
+      vy: 0,
+      color: "#00f",
+      isMoving: false
+    };
+
+    let isDragging = false;
+    let dragStart = { x: 0, y: 0 };
+
+    function drawBall() {
+      ctx.beginPath();
+      ctx.arc(ball.x, ball.y, ball.radius, 0, Math.PI * 2);
+      ctx.fillStyle = ball.color;
+      ctx.fill();
+      ctx.closePath();
+    }
+
+    function drawLineToMouse(mouseX, mouseY) {
+      ctx.beginPath();
+      ctx.moveTo(ball.x, ball.y);
+      ctx.lineTo(mouseX, mouseY);
+      ctx.strokeStyle = "#fff";
+      ctx.stroke();
+    }
+
+    function update() {
+      if (ball.isMoving) {
+        ball.x += ball.vx;
+        ball.y += ball.vy;
+
+        ball.vx *= 0.98;
+        ball.vy *= 0.98;
+
+        if (Math.abs(ball.vx) < 0.1 && Math.abs(ball.vy) < 0.1) {
+          ball.vx = 0;
+          ball.vy = 0;
+          ball.isMoving = false;
+        }
+      }
+    }
+
+    function draw() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      drawBall();
+      if (isDragging) drawLineToMouse(dragStart.x, dragStart.y);
+    }
+
+    function gameLoop() {
+      update();
+      draw();
+      requestAnimationFrame(gameLoop);
+    }
+
+    canvas.addEventListener("mousedown", (e) => {
+      if (!ball.isMoving) {
+        isDragging = true;
+        dragStart = { x: e.offsetX, y: e.offsetY };
+      }
+    });
+
+    canvas.addEventListener("mouseup", (e) => {
+      if (isDragging) {
+        const dx = dragStart.x - e.offsetX;
+        const dy = dragStart.y - e.offsetY;
+        ball.vx = dx * 0.2;
+        ball.vy = dy * 0.2;
+        ball.isMoving = true;
+        isDragging = false;
+      }
+    });
+
+    gameLoop();
+  </script>
+</body>
+</html>
